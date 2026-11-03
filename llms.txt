@@ -1,0 +1,168 @@
+# Florian Herrengt
+
+> Software engineer and consultant.
+
+Updated: 2026-11-03.
+
+This profile brings together Florian's public CV, blog, projects, writing and
+online profiles. The work history currently ends in February 2023. Later work
+and further personal details will be added when supplied; their absence here
+does not imply a career gap. Historical project figures refer to that period.
+
+## Online
+
+- Website: https://florianherrengt.com/
+- Blog: https://blog.florianherrengt.com/
+- GitHub: https://github.com/florianherrengt
+- LinkedIn and consulting contact: https://www.linkedin.com/in/florian-herrengt-ab203494/
+- X: https://x.com/florianherrengt
+- Hacker News submissions: https://news.ycombinator.com/submitted?id=florianherrengt
+- Newsletter: https://newsletter.florianherrengt.com/subscription/form
+- RSS: https://blog.florianherrengt.com/rss.xml
+- CV, with PDF download: https://florianherrengt.com/cv.html
+- This profile: https://florianherrengt.com/llms.txt
+
+## Background and approach
+
+- Software engineering experience across back-end systems, web and mobile apps,
+  APIs, analytics and data-intensive systems.
+- Experience co-founding a product and leading engineering teams.
+- Prefers simple software and tools chosen for the problem at hand.
+- Writes about software engineering, AI, LLMs and practical projects.
+
+## Skills listed in the CV
+
+- TypeScript, JavaScript, Node.js, Express.js, React and React Native.
+- GraphQL and API integrations.
+- Linux, AWS, AWS Lambda and Azure.
+- MySQL, PHP, time-series data and data architecture.
+- Test-driven development, automated testing, continuous integration and
+  delivery, GitHub Actions, Agile and pair programming.
+- Engineering team leadership and collaboration with designers and data teams.
+
+## Work history
+
+### Nocodelytics - Co-founder
+
+June 2021 - February 2023.
+
+- Built analytics for tracking clicks, searches and CMS items on Webflow sites.
+- The CV records more than 1,000 tracked sites, hundreds of requests per second
+  and millions of events.
+- Built Webflow API integrations. The product was among the first apps on the
+  Webflow Marketplace and was featured at Webflow Conf.
+
+### ContentCal - Contract
+
+June 2020 - June 2021.
+
+- Built social-platform integrations for scheduling posts and analysing
+  engagement on a new product.
+- Introduced GraphQL to the team.
+- Implemented continuous integration with GitHub Actions and automated tests.
+
+### TRIM-IT - Project Lead Developer, contract
+
+September 2018 - March 2019.
+
+- Led four engineers delivering a data platform within six months.
+- Built iOS and Android apps with React Native, GraphQL and AWS Lambda.
+- The project received coverage from the BBC, Evening Standard and Hacker News.
+
+### Financial Times - Contract
+
+July 2017 - July 2018.
+
+- Redesigned the article page with designers and the UX team.
+- Worked on the Breaking News page.
+- Joined the data science team and contributed to a recommendation engine.
+
+### Lightful - Contract
+
+February 2017 - June 2017.
+
+- Integrated Twitter's feed to find content for social media posts.
+- Worked on identifying posting times to improve engagement and reach.
+
+### Deeper Insights - Full-time
+
+June 2015 - February 2017.
+
+- Worked at an early-stage machine learning and natural language processing
+  company.
+- Built a Node.js API and React front end.
+- Implemented CI workflows for infrastructure supporting machine learning models.
+
+### Earlier roles
+
+- Adjust Your Set: October 2014 - May 2015, full-time. Node.js, Express and MySQL.
+- IG Index: June 2014 - September 2014, full-time. MySQL.
+- Agora Finance Services: September 2012 - September 2014, full-time. PHP and MySQL.
+- Haubourdin Town Hall: August 2011 - August 2012, full-time. PHP and MySQL.
+- Intuitive Travel: August 2011 - August 2012. PHP and MySQL.
+
+## Other projects
+
+### 3D printing face shields for NHS workers
+
+During the COVID-19 crisis, Florian worked with a team producing and donating
+face shields for NHS workers. They set up a small printing operation at Craft
+Central, using feedback from medical staff. The article records more than 1,000
+shields made by early May 2020.
+
+- Project: https://blog.florianherrengt.com/3d-printing-ppe.html
+- Fundraiser: https://www.gofundme.com/f/3d-printing-face-shields-for-nhs-workers
+
+### Self-driving RC car
+
+A project using Arduino, Python, a camera, computer vision and machine learning
+to control an RC car.
+
+- Project: https://blog.florianherrengt.com/self-driving-rc-car.html
+
+### How to build and host a web app
+
+A tutorial listed in the CV.
+
+- Tutorial: https://tutorial.specian.co.uk
+
+## Writing
+
+- Most "Best Practices" are cargo cults (26 August 2026):
+  https://blog.florianherrengt.com/do-less.html
+- AI is removing the middle class of software engineering (11 August 2026):
+  https://blog.florianherrengt.com/ai-removing-middle-class-software-engineering.html
+- How to automate Instagram engagements with computer vision (and get banned)
+  (6 June 2026):
+  https://blog.florianherrengt.com/how-to-automate-instagram-engagements.html
+- Good engineers make boring choices (16 April 2026):
+  https://blog.florianherrengt.com/boring-software-engineer.html
+- From bigrams to attention: a gentle guide to LLMs (21 July 2025):
+  https://blog.florianherrengt.com/how-llms-work.html
+- The vibe coder's career path is doomed (17 July 2025):
+  https://blog.florianherrengt.com/vibe-coder-career-path.html
+- 3D printing to help the NHS (6 June 2020):
+  https://blog.florianherrengt.com/3d-printing-ppe.html
+- Building a basic self driving RC car (23 February 2017):
+  https://blog.florianherrengt.com/self-driving-rc-car.html
+- How to reduce query cost with a wide table layout in TimescaleDB:
+  https://www.tigerdata.com/blog/how-to-use-wide-table-model-to-reduce-query-cost-in-timescaledb
+
+## Interviews and appearances
+
+- Timescale Timeout with Florian Herrengt and Chris Engelbert:
+  https://www.youtube.com/watch?v=k4BJdmpuhro
+- Benjamin Michel: Decision Making in Tech:
+  https://www.youtube.com/watch?v=PBZ2NKFaRKo
+
+## Related coverage
+
+- Adobe to acquire ContentCal:
+  https://blog.adobe.com/en/publish/2021/12/08/adobe-to-acquire-content-cal
+- BBC, Mobile barbering: "It's like Uber, but for haircuts" (TRIM-IT):
+  https://www.bbc.com/news/stories-47711610
+- Charity Digital, The best social media management platforms for charities
+  (Lightful):
+  https://charitydigital.org.uk/topics/topics/the-best-social-media-management-platforms-for-charities-5817
+- Forbes, What Are The 10 Best AI Consulting Firms (Deeper Insights):
+  https://www.forbes.com/sites/bernardmarr/2022/08/17/what-are-the-10-best-ai-consulting-firms/
