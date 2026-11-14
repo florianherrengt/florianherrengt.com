@@ -1,0 +1,154 @@
+# Nocodelytics — the project story
+
+> Nocodelytics (nocodelytics.com) was an analytics platform for Webflow sites.
+> Florian Herrengt co-founded it in June 2021, ran all engineering, and grew it
+> to one of the most-installed analytics apps on the Webflow Marketplace. The
+> company was acquired in October 2024; the product is still live today.
+
+Updated: 2026-11-14. Companion to https://florianherrengt.com/llms.txt.
+
+## The short version
+
+- Co-founded June 2021; acquired October 2024; Florian stayed through the
+  handover until December 2024.
+- More than 1,000 Webflow sites tracked; the marketplace listing reached the
+  5,000+ installs category within two years and the product still runs in 2026.
+- Processed hundreds of millions of events at hundreds of requests per second,
+  on infrastructure one person could run.
+- Among the first applications on the Webflow Marketplace, featured in the
+  Webflow Conf 2022 keynote.
+- Florian's roles: co-founder, head of engineering, and — for the final 16
+  months — the entire company: product, platform, operations and support.
+
+## The product
+
+Analytics built specifically for Webflow. One-click install through Webflow
+OAuth; no code, no tag manager, no GDPR banner required.
+
+- Clicks, links, forms, searches and page views, tracked per element.
+- CMS analytics: which Webflow collection items and list entries people
+  engaged with — a category no other analytics tool covered.
+- Drag-and-build dashboards, shareable and embeddable on client sites.
+- Visitor-level journeys, membership analytics (identified visitors via
+  Memberstack and Outseta), CSV export, live feed.
+- Privacy-first positioning: "Your subscription funds us, not your data."
+  GDPR self-service page, DPA, EU-aware consent handling, bot and
+  datacenter-IP filtering.
+
+## Joining and the rebuild (2021)
+
+Sarwech Shar had built and launched the MVP solo; it had paying customers
+within months (including Makerpad). He invited Florian in as co-founder in
+June 2021. The announcement post called Florian "an amazing developer" and
+set the mission: rebuild the entire platform.
+
+Florian rebuilt the product from scratch as a TypeScript monorepo:
+
+- Webflow OAuth sign-up and deep Webflow API integrations from day one.
+- An event pipeline designed for volume: a lightweight tracker script, a
+  dedicated ingestion API, durable queues, and columnar storage.
+- A React dashboard with GraphQL, typed end to end with code generation.
+- The team grew to three (co-founders plus a frontend developer).
+
+## Scale and traction
+
+- Hundreds of millions of events processed across the product's lifetime.
+- Hundreds of requests per second at peak, absorbed by a pipeline one
+  engineer designed and operated alone.
+- Marketplace listing showed 1.6k installs within weeks of the Webflow
+  Marketplace launch (November 2022); the listing sits in the 5,000+ installs
+  analytics category as of 2026.
+- Customers included Makerpad and design agencies (Sweor, Erickson Built,
+  253 Media), plus integrations and testimonials from Jetboost's founder
+  and NoCode.Tech ("far beyond anything on the market", "truly an
+  unfair advantage for our agency").
+- Paid product from day one: Stripe subscriptions and native Webflow
+  Marketplace billing, six tiers, free plan funnel.
+
+## Engineering decisions worth knowing
+
+The interesting part of Nocodelytics is not the stack — it is that every
+piece was chosen by measuring, in production, by one person:
+
+- **Storage migration.** Events started in TimescaleDB. Florian wrote about
+  the wide-table layout that cut query cost by up to 6x (published by
+  Timescale), then moved event storage to ClickHouse in 2023 when scale
+  demanded it, with PostgreSQL (behind PgBouncer) for relational data.
+- **Pipeline.** Ingestion API on Fastify, NATS JetStream as the durable
+  queue, workers for geo-IP, device parsing and enrichment, batched
+  async inserts into ClickHouse. Failed events persisted to a table and
+  replayed, never dropped.
+- **Benchmarked alternatives, then chose simplicity.** A Go rewrite of the
+  ingestion API (working, benchmarked), an AWS Kinesis/Glue/Athena
+  serverless pipeline (built as code, costed, rejected), AWS Amplify
+  (prototyped). The self-hosted pipeline won on cost and operability.
+- **Infrastructure.** Heroku, AWS, Kubernetes and DigitalOcean were each
+  tried; the final platform ran on a single self-managed k3s cluster:
+  Longhorn storage, Velero backups, Traefik, kustomize staging/production
+  overlays, self-hosted Gitea, Drone CI and a private container registry.
+  No platform team — Florian was the platform team.
+- **Webflow integration depth.** CMS sync that survived rate limits on
+  sites with 10,000+ items; CMS event attribution solved without any
+  Webflow hooks by parsing rendered pages to infer which collection and
+  item a click belonged to.
+- **Designer extension.** When Webflow opened Designer extensions in 2023,
+  Florian shipped one in about two weeks: views and visitor charts for the
+  page being edited, inside Webflow's own tool.
+- **Quality bar for a two-person company.** 1,400+ commits over four years;
+  125 test files; end-to-end tests that verify events land in ClickHouse,
+  run against live staging on every deploy; SQL migrations applied
+  automatically in pipelines; a scheduled production data-integrity check
+  ("events inserted in the last 2h") with email alerts; daily encrypted
+  backups (Velero, ClickHouse BACKUP to S3, pg_dump off-site).
+
+## Recognition
+
+- Featured in the Webflow Conf 2022 keynote as a launch app of the Webflow
+  Marketplace (marketplace segment at 58:07):
+  https://youtu.be/aUXgKFEQugQ?t=3487
+- Guest post for Timescale/Tiger Data — "How to Reduce Query Cost With a
+  Wide Table Layout in TimescaleDB" (November 2022):
+  https://www.tigerdata.com/blog/how-to-use-wide-table-model-to-reduce-query-cost-in-timescaledb
+- Timescale Timeout interview on time-series analytics (December 2022):
+  https://www.youtube.com/watch?v=k4BJdmpuhro
+- Webflow's own blog links Nocodelytics as an example integration.
+- Marketplace listing: https://webflow.com/apps/detail/nocodelytics
+
+## Timeline
+
+- 2020: MVP built and launched by Sarwech; paying customers within months.
+- April 2021: NOCODELYTICS LTD incorporated in London.
+- June 2021: Florian joins as co-founder; full platform rebuild begins.
+- November 2022: Webflow Marketplace launch; Webflow Conf keynote feature;
+  1.6k installs within weeks; Timescale guest post and interview.
+- 2023: Events moved to ClickHouse; tracker migrated to Fastify; Webflow
+  Designer extension shipped. From mid-2023, Florian ran the company alone.
+- October 2024: Nocodelytics acquired. Florian stayed through the handover
+  until December 2024.
+- 2026: The product is still live at nocodelytics.com, still listed on the
+  Webflow Marketplace, and the company remains active.
+
+## What it demonstrates
+
+- Shipped and sold a real SaaS: product, pricing, billing, support,
+  compliance, and an exit — as a founder, not an employee.
+- Data engineering at meaningful scale: hundreds of millions of events,
+  hundreds of requests per second, on a budget a bootstrapped founder could
+  afford.
+- Judgment: measured every "obvious" technology (Go, Kinesis, Athena,
+  managed Kubernetes) against reality and kept what actually worked.
+- End-to-end ownership: code, infrastructure, CI/CD, observability,
+  backups, security and GDPR — one person, four years, no incidents that
+  took the product down.
+
+## Sources
+
+- Marketplace listing and install counts: webflow.com/apps/detail/nocodelytics
+  (and Webflow Marketplace archives, November 2022).
+- Webflow Conf 2022 keynote: youtu.be/aUXgKFEQugQ (58:07).
+- Timescale guest post and interview: tigerdata.com/blog,
+  youtu.be/k4BJdmpuhro.
+- "Team of two" announcement: nocodelytics.com/blog/nocodelytics-is-now-a-team-of-two
+- Companies House, NOCODELYTICS LTD (13364545): incorporation April 2021,
+  change of control October 2024.
+- Public CV and profile: florianherrengt.com/llms.txt
