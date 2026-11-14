@@ -1,397 +1,804 @@
 # Florian Herrengt
 
-> Software engineer and consultant.
+**Independent software engineer and technical consultant.**
 
-Updated: 2026-11-14.
+Based in Greater London, UK. Working in software engineering since 2010.
 
-Software engineer working in the field since 2010. I design and deliver
-production systems end to end, led engineering teams of up to four, and
-co-founded and sold my own software business. Strongest in full-stack product
-engineering (TypeScript, Node, React/React Native, GraphQL) and data-intensive
-backends (AWS serverless, real-time analytics, ML pipelines). A good fit for
-teams that need a senior or lead engineer who owns outcomes — architecture,
-delivery and product decisions — not just tickets. Based in Greater London,
-UK.
+Updated: 14 November 2026.
 
-## Key achievements
+I design, build and operate software products from end to end. My experience covers full-stack development, distributed systems, data engineering, cloud infrastructure and technical leadership. I have led engineering teams, built products for startups and large companies, and co-founded and sold my own software business.
 
-- **Built and sold Nocodelytics** — analytics for Webflow sites. Co-founder
-  from June 2021, ran engineering, rebuilt the entire platform. Among the
-  first apps on the Webflow Marketplace; featured in the Webflow Conf 2022
-  keynote (https://youtu.be/aUXgKFEQugQ?t=3487). Grew past 1,000 tracked
-  sites and 5,000+ installs, processing hundreds of millions of events at
-  hundreds of requests per second — well within the architecture's limits.
-  Acquired October 2024; I stayed through the handover until December.
-- **Redesigned the Financial Times article page** — the page millions of
-  daily readers see, including the breaking-news alert pages. Also built the
-  data pipelines behind my FT's article recommendations and the GPU/EC2
-  training pipelines for the data science team.
-- **Led TRIM-IT's platform build** — project lead, four engineers, data
-  platform delivered in six months: React Native iOS/Android apps, GraphQL
-  API on serverless, infrastructure fully in CloudFormation. Covered by the
-  BBC (https://www.bbc.com/news/stories-47711610), Evening Standard and
-  Hacker News. The founders went on to raise their next round — their
-  achievement, enabled in part by the product.
+I am strongest when a project needs someone who can take ownership of the technical work and make decisions based on business needs. That means understanding the product, choosing the architecture, writing the software, operating it in production and deciding what does not need to be built.
+
+My main technologies are TypeScript, Node.js, React, PostgreSQL, ClickHouse, NATS, AWS and Kubernetes. I also have practical experience with machine learning, recommendation systems and data pipelines.
+
+I am a good fit for senior and lead engineering roles, founding engineer positions and consulting projects where technical independence and product judgement matter.
+
+## Selected achievements
+
+### Built and sold Nocodelytics
+
+I co-founded Nocodelytics, an analytics product for Webflow websites, and led its engineering from 2021 to 2024.
+
+I rebuilt the original product, developed the event processing platform and operated its infrastructure. From mid-2023, I also ran the day-to-day business independently, including product development, customer support, operations and billing.
+
+The product grew to:
+
+- More than 1,000 websites sending analytics data.
+- Hundreds of millions of events processed.
+- Millions of events per day, with observed peaks of hundreds of ingestion requests per second.
+- The 5,000+ installs category on the Webflow Marketplace.
+
+Nocodelytics was among the first apps on the Webflow Marketplace. Webflow featured the product during its official Webflow Conf 2022 keynote, displaying it on a slide and explicitly naming it from the stage. [Watch the keynote at 58:07](https://youtu.be/aUXgKFEQugQ?t=3487).
+
+The company was acquired in October 2024. I remained involved through December to complete the handover.
+
+**Evidence:**
+
+- [Nocodelytics co-founder announcement](https://www.nocodelytics.com/blog/nocodelytics-is-now-a-team-of-two)
+- [Webflow Conf 2022 keynote](https://youtu.be/aUXgKFEQugQ?t=3487)
+- [Technical article published by Timescale](https://www.tigerdata.com/blog/how-to-use-wide-table-model-to-reduce-query-cost-in-timescaledb)
+
+### Built software used by millions of Financial Times readers
+
+At the Financial Times, I worked with the product, design and engineering teams to redesign the article page, including the special formats used for major breaking news.
+
+I implemented the designs and worked on accessibility for readers with disabilities.
+
+I also joined the team behind myFT, the personalised reading experience. I built data pipelines and worked on article recommendation systems, including machine-learning experiments and simpler data-driven approaches.
+
+### Led TRIM-IT's platform development
+
+I led four engineers on a six-month project to build the technical platform for TRIM-IT, a London startup offering haircuts through mobile barber vans.
+
+The project included:
+
+- React Native applications for iOS and Android.
+- A GraphQL API.
+- Serverless infrastructure on AWS.
+- Infrastructure defined in CloudFormation.
+- Automated deployment pipelines.
+- A supporting data platform.
+
+The challenge was not only building software quickly. It was deciding which features the company needed to prove its business model and which features could wait.
+
+The founders later raised additional funding and gained paying customers. Their business achievements were supported in part by the product we delivered.
+
+TRIM-IT received coverage from the [BBC](https://www.bbc.com/news/stories-47711610), Evening Standard and Hacker News.
+
+### Helped early-stage companies deliver their first products
+
+For Wanderpay, a travel finance startup, I built the initial working product in a two-week fixed-price engagement.
+
+The work included lender integrations and the user interface for financing travel purchases.
+
+Wanderpay co-founder Sait Cham later credited my engineering and product architecture with helping the company bring its product to market and raise seed funding.
+
+I also worked at ContentCal, where I helped modernise an existing system, introduced GraphQL and improved deployment practices. ContentCal was subsequently acquired by Adobe.
+
+These projects shaped how I work: understand the commercial objective first, then choose the simplest technical approach that can achieve it.
+
+---
 
 ## Technical case studies
 
-### Event analytics at scale on TimescaleDB (Nocodelytics)
+### 1. Nocodelytics: production event analytics
 
-Problem: ingest every interaction (clicks, links, forms, page views, Webflow
-CMS items, plus third-party tools like Jetboost, Wized, Memberstack and
-Outseta) from 1,000+ sites — millions of events per day, with sharp spikes
-when a customer's site gets publicity — and serve dashboard queries fast
-enough that several concurrent metrics feel instant.
+**Role:** Co-founder and lead engineer  
+**Period:** 2021–2024  
+**Technologies:** TypeScript, Fastify, NATS JetStream, ClickHouse, PostgreSQL, TimescaleDB, GraphQL, React, Kubernetes, Helm, Longhorn
 
-Design: a tracking script with automatic event capture; a metric creator
-that is simple on the frontend but compiles to advanced SQL on the backend;
-storage in TimescaleDB (time-series on Postgres). The key decision was a
-wide table layout instead of a normalized one:
+#### The problem
 
-- Measured result: queries up to **6x less costly** with the wide table
-  layout.
-- The write-up, with schema and benchmarks, was published by Timescale on
-  their own engineering blog:
-  https://www.tigerdata.com/blog/how-to-use-wide-table-model-to-reduce-query-cost-in-timescaledb
+Nocodelytics needed to collect and analyse user activity across more than 1,000 Webflow websites.
 
-### Nocodelytics: end to end, from rebuild to exit (2021 - 2024)
+It tracked events that conventional website analytics often did not handle well:
 
-I joined as co-founder in June 2021 — Nocodelytics was an MVP with paying
-customers — and rebuilt the entire platform: a TypeScript monorepo with
-Webflow OAuth sign-up, a React/GraphQL dashboard, a lightweight tracker
-script, and an event pipeline designed for volume. I built the product
-alone for the first six months; by the formal June 2021 start I had
-already shipped ~180 commits, and the engineering platform — CI, Docker
-builds, migrations in the pipeline, dependency automation — was stood up
-in a single 88-commit day in April 2021. Team of three at the peak. From
-mid-2023 I ran the whole company alone through to the sale: product,
-engineering, infrastructure, operations, support.
+- Clicks on individual elements.
+- Form submissions.
+- Website searches.
+- Webflow CMS collection and item interactions.
+- Activity involving integrations such as Jetboost, Wized, Memberstack and Outseta.
 
-- Product: per-element clicks, forms, searches and CMS analytics —
-  categories other analytics tools did not cover for Webflow. Very large
-  CMS collections (sites with 10,000+ items) were hard to support and a
-  selling point; CMS event attribution worked without any Webflow hooks,
-  by parsing rendered pages to infer the collection and item behind a
-  click.
-- Pipeline, in production. The path an event takes:
-  - Ingestion: a Fastify API receives every event. It validates the
-    payload, stamps IDs and timestamps on the server so clients cannot
-    forge them, and rejects abusive traffic before anything enters the
-    pipeline.
-  - Queue: accepted events are published to NATS JetStream with
-    file-backed storage. An event is retained until it has been fully
-    processed, so restarts, deploys and traffic spikes never block
-    ingestion and no accepted event is lost.
-  - Enrichment: a worker turns each raw event into a usable one. It
-    resolves the site, geolocates the IP, parses the device, filters out
-    bots and headless browsers, and attributes CMS clicks to the right
-    Webflow collection and item by parsing the rendered page.
-  - Storage: ClickHouse, with rows laid out by site and time so
-    dashboard queries read one contiguous range instead of scanning.
-    Events started in TimescaleDB and moved to ClickHouse in 2023.
-    Because ingestion only talks to the queue, that swap touched
-    neither the tracker nor the API.
-  - Guarantees: a write is acknowledged only after ClickHouse confirms
-    it. A failed insert is quarantined for replay rather than dropped or
-    left blocking the queue. Health checks watch the queue backlog and
-    confirm events keep flowing. Daily off-site backups cover the worst
-    case, and every deploy runs an end-to-end test that sends a real
-    event through the public endpoint and asserts it lands in
-    ClickHouse.
-  - Alternatives I built before choosing this: a Go rewrite of the
-    ingestion API, load-tested against the Node version, and a full
-    serverless pipeline on AWS — Lambda, Kinesis Firehose, S3, Glue,
-    Athena. Self-hosting won on cost and operability at our volume.
-- Operations: one self-managed k3s cluster — 23 self-hosted components
-  across the cluster, storage, databases, queueing, observability, CI/CD
-  and internal tooling, every layer operated alone. The whole platform
-  was rebuilt solo in 10 days in December 2023, ending on a commit that
-  read "working system", replacing AWS with a single self-managed server
-  while production kept running.
-- Quality bar: 1,400+ commits over four years, all before AI assistants —
-  every commit was hand-written work; 125 test files; SQL migrations
-  applied automatically in pipelines; DPA and GDPR self-service. Active
-  41 of 46 months; 22% of commits touched test files; 442 reviewed pull
-  requests; loadtesting scripts from August 2021 onward.
-- Traction: 1.6k installs in the first weeks of the Webflow Marketplace
-  launch (November 2022), later the 5,000+ installs category; customers
-  included Makerpad and Webflow agencies; testimonials from Jetboost's
-  founder and NoCode.Tech. When Webflow opened Designer extensions in
-  2023, I shipped ours in just over two weeks — charts inside the
-  Webflow designer.
-- Business instrumentation: MRR reporting, admin subscriber and usage
-  views, usage-based free plan limits with automatic upgrade emails,
-  7-day trials, and billing through both Stripe and native Webflow
-  Marketplace subscriptions.
+Some customers had CMS collections containing more than 10,000 items.
 
-### Reliability as a team of one (Nocodelytics)
+The platform needed to identify which CMS item a visitor interacted with, even when Webflow did not provide a dedicated event hook. I implemented attribution by examining the rendered page and identifying the relevant collection and item.
 
-For an analytics product the reliability bar is higher than usual: when the
-tracker is down, events are missed forever. Across 3.5 years — the final 16
-months entirely alone — no incident ever took the product down. The
-mechanisms are visible commit by commit.
+The system also needed to handle sudden traffic spikes without slowing down customer websites or dashboard queries.
 
-Prevention by design:
+#### Architecture
 
-- Every write path went through a durable queue. My standing rule, from my
-  own notes: "if no one is waiting for the results, always use a queue."
-  Events were persisted before processing; events that failed processing
-  were quarantined and replayed, never dropped.
-- Workers ran as separate deployments from the APIs, so a pipeline backlog
-  could never take the dashboard down, and a deploy could never stall
-  ingestion.
-- Health endpoints for every datastore and worker, wired into Kubernetes
-  liveness and readiness probes, on top of a full observability stack I
-  operated myself.
-- Immutable deployments: container images pinned to exact commit SHAs
-  since December 2022; later, rolling deploys one replica at a time so a
-  bad release never hit every pod at once.
-- Four independent backup layers — cluster volume snapshots, recurring
-  storage backups, daily database dumps, and daily event-store backups
-  to object storage. The event-store backup window was moved into the
-  quietest traffic period after I measured it: backups were scheduled
-  around customers, not around convenience.
+The production architecture separated event ingestion, processing, storage and reporting.
 
-Detection beyond uptime:
+**Event flow:**
 
-- A scheduled data-integrity check ran against production, asserting that
-  events were still flowing ("events inserted in the last 2h" is
-  non-zero) and still being enriched (geo country present), emailing me
-  only on failure. It genuinely paged: I tuned its window from 1h to 2h
-  to cut false positives, which is the receipt that it ran for real.
+1. **Client-side tracker:** A lightweight script automatically captured relevant interactions on each customer website.
+2. **Ingestion API:** A Fastify service validated events, added server-generated identifiers and timestamps, and filtered unwanted traffic.
+3. **Durable queue:** NATS JetStream stored accepted messages and separated ingestion from downstream processing.
+4. **Enrichment workers:** Independent workers resolved site identities, parsed devices, processed location information, filtered bots and attributed CMS interactions.
+5. **Analytics database:** ClickHouse stored event data for time-series analysis and dashboard queries.
+6. **Application database:** PostgreSQL managed accounts, websites, dashboards, billing data and failed-event quarantine.
+7. **Customer dashboard:** React and GraphQL provided the interface for creating and viewing analytics.
 
-Incident response, measured in the git history:
+The main design principle was to keep ingestion independent of expensive processing.
 
-- Rollback was always the first tool, and it was fast: three queue
-  architecture pivots inside 16 minutes one afternoon in September 2023
-  (switch, revert, switch again); a bad memory increase reverted in
-  33 minutes.
-- Webflow API v2 migration, my largest single change (+8,700 lines,
-  84 files): launched Saturday, rolled back Sunday morning, maintenance
-  mode Sunday afternoon, relaunched Tuesday with the redirect fixes — a
-  full detect, rollback, fix, relaunch cycle inside 72 hours.
-- A throughput weekend in September 2023: worker concurrency raised from
-  100 to 1,000 with retry tuning, to drain an event backlog before
-  customers noticed it in their dashboards.
-- Across 3.5 years: 54 commits on 23 weekend days — every one
-  incident- or migration-driven, never chronic overtime.
+If processing slowed down, the queue could absorb the backlog. Workers could then continue processing stored messages.
 
-Zero-downtime migrations:
+Workers acknowledged successful processing after the database confirmed the write. Events that could not be processed were sent to a quarantine store for later investigation and replay.
 
-- ClickHouse: a six-month dual-write, September 2023 to March 2024.
-  New writes went to ClickHouse alongside Postgres from day one; reads
-  moved six months later, once the new path was proven at full traffic;
-  the Postgres insert was deleted last, as a two-line change.
-- NATS rollout: events were first published for named customer sites,
-  then a growing beta list, then everyone — staged, customer by
-  customer.
-- Leaving AWS: the replacement platform was rebuilt while production
-  kept running; the product was redeployed on the new cluster within
-  the month, and production traffic was cut over in March 2024.
+The queue and processing design supported retries and recovery. I did not rely on it as a guarantee against every possible form of data loss.
 
-The honest summary: reliability came from simplicity, reversibility and
-rehearsal. Small pieces, queues between them, everything deployable in
-minutes and revertible in minutes, staged before global, and a backup
-layer for the day none of it was enough.
+#### Database design
 
-### Recommendation engine for my FT (Financial Times)
+The analytics system initially used TimescaleDB, built on PostgreSQL.
 
-Problem: recommend articles to paying readers, where "more reading = better"
-is the wrong metric and good is hard to measure.
+One important decision was to use a wide table rather than a conventional normalised relational design for analytics data.
 
-What I tried first: deep learning — LSTM (long short-term memory) networks
-in Keras. Result after about three months: one or two points of improvement,
-negligible, over simply recommending the top front-page articles. I dropped
-it and count that as my mistake.
+This reduced the work needed to assemble records during metric queries.
 
-What shipped: a simpler rule-based system backed by data — keyword matching,
-K-means clustering, and entity-follow expansion (a Brexit follower gets new
-articles mentioning the Prime Minister). User testing showed readers were
-satisfied.
+The result was documented in a technical article published on Timescale's engineering blog:
 
-A year after I left, the 2019 RecSys paper "Are We Really Making Much
-Progress?" showed the same finding field-wide: simple baselines matching
-neural recommenders. Lesson kept: always try the simple approach first.
+[How to reduce query cost with a wide table layout in TimescaleDB](https://www.tigerdata.com/blog/how-to-use-wide-table-model-to-reduce-query-cost-in-timescaledb)
 
-## What my references say (LinkedIn recommendations)
+The published comparison showed an approximately sixfold reduction in PostgreSQL's estimated query-plan cost for the example query. Actual query execution also became significantly faster, although the published figure is not a sixfold runtime benchmark.
 
-- **Sait Cham**, Wanderpay co-founder, my client: "Florian acts as a perfect
-  bridge between non-technical founders and their product... able to hire,
-  organise and manage our developers... Because of Florian's expertise in
-  management and product architecture, we were able to raise a healthy
-  seed-round and take our initial product to market."
-- **Julian Hamm**, ContentCal: "What I like about Florian's solutions is
-  that they're simple and clean, which is very rare to find. I learnt a lot
-  from him, in particular how to use AWS, Hasura, GraphQL and serverless...
-  we now have a streamlined CI/CD pipeline that allows us to deploy as many
-  times in a day as we want."
-- **Taran Gulati**, ContentCal: "A stellar developer with a breadth of
-  technical knowledge and strong business sense. He has been instrumental in
-  re-architecting the tech stack whilst balancing the business needs."
-- **Sarwech Shar**, Nocodelytics co-founder: "His ability to learn new
-  concepts and then immediately apply his knowledge is uncanny, such as
-  building a neural network for a driverless car or teaching himself the
-  fundamentals of mobile app development within 1 week."
-- **Miroslav Batchkarov**, Skim.it, now research engineer at Google DeepMind:
-  "One of those rare people who understand both software engineering and
-  your business needs."
-- **Andy Davis**, 10x10: "It's rare to come across commercially minded
-  engineers and much rarer to come across some with such high talent — that
-  is who Florian is."
+The article includes schema examples, SQL queries, execution plans and an explanation of the design decision.
+
+This experience also reinforced a lesson: database design should reflect how the application reads its data, not only how the data is logically related.
+
+#### Moving from TimescaleDB to ClickHouse
+
+As the product grew, I moved event analytics from TimescaleDB to ClickHouse.
+
+I used a gradual migration rather than replacing the database in one operation.
+
+The transition involved:
+
+- Starting dual writes in September 2023.
+- Sending new analytics events to both the existing PostgreSQL-based path and ClickHouse.
+- Running the new storage path under production traffic before switching customer queries.
+- Moving reads to ClickHouse after the new path had been tested.
+- Removing the original event-write path last, in March 2024.
+
+The migration took approximately six months and did not cause a complete production outage.
+
+Because ingestion, processing and storage were separated, the change did not require rewriting the client-side tracker or public ingestion API.
+
+#### Evaluating alternative architectures
+
+I did not start with the final architecture.
+
+I built and tested alternatives, including:
+
+- A Go implementation of the ingestion API, benchmarked against the Node.js implementation.
+- A fully serverless AWS processing pipeline using Lambda, Kinesis Firehose, S3, Glue and Athena.
+- PostgreSQL and TimescaleDB storage designs.
+- The later NATS and ClickHouse architecture.
+
+The decision was based on performance, cost, deployment complexity and the operational requirements of a small business.
+
+I selected the self-managed approach because it offered a better balance of cost and operational control for the product's actual workload.
+
+I prefer to test technical alternatives rather than assume a newer language, service or architecture must be better.
+
+### 2. Operating Nocodelytics: infrastructure and reliability
+
+**Role:** Engineering and infrastructure owner  
+**Technologies:** Kubernetes (k3s), Hetzner, Helm, Longhorn, Traefik, NATS, PostgreSQL, ClickHouse, CI/CD
+
+For much of Nocodelytics' life, I was responsible for the entire production system.
+
+That included application development, infrastructure, databases, deployment, monitoring, security updates, backups and recovery.
+
+From mid-2023, I managed these responsibilities without another full-time engineer.
+
+#### Infrastructure
+
+I migrated the production platform from AWS to a self-managed Kubernetes environment hosted on Hetzner.
+
+The platform used k3s and Helm-managed services, including PostgreSQL, ClickHouse, NATS and supporting infrastructure.
+
+Longhorn provided persistent-volume management.
+
+The wider tooling included Traefik, Kubernetes deployment configuration, self-hosted source control, CI/CD pipelines and a private container registry.
+
+I rebuilt the platform in December 2023 and completed the production migration during the following months, with traffic moved to the new environment in March 2024.
+
+The change did not require a complete production outage.
+
+The Kubernetes environment made service configuration and deployment consistent. Services could be managed through repeatable deployment procedures instead of manual changes to running machines.
+
+#### Reliability
+
+An analytics system has an unusual reliability requirement: if its public tracking endpoint is unavailable, some events may never be recorded.
+
+I designed the system around several practices.
+
+**Separate services**
+
+The public ingestion API, processing workers and dashboard ran as separate deployments.
+
+This reduced the risk that a slow analytics query or processing backlog would interfere with incoming events.
+
+**Durable event processing**
+
+NATS JetStream provided persistent message storage and controlled delivery to workers.
+
+Failed events could be quarantined and investigated without blocking normal processing.
+
+**Automated tests**
+
+The project included 125 test files, covering application behaviour and supporting systems.
+
+End-to-end tests sent real events through the staging ingestion endpoint and verified that the resulting data appeared in ClickHouse.
+
+Database migrations were part of automated deployment pipelines.
+
+**Monitoring beyond service uptime**
+
+A service can be running while producing incorrect or incomplete data.
+
+I added scheduled production checks to confirm that recent events were arriving and that enrichment fields were being populated.
+
+The checks sent alerts when the expected data was missing.
+
+I adjusted their time windows after observing false positives, so that alerts represented meaningful problems rather than normal fluctuations.
+
+**Backups and recovery**
+
+The system used several backup mechanisms, including storage snapshots, database dumps and off-site object storage.
+
+I tested recovery procedures rather than relying only on successful backup jobs.
+
+**Controlled deployments**
+
+Deployment processes included immutable container images, versioned configurations, staged changes and rollback procedures.
+
+I treated the ability to reverse a change as an important part of deployment quality.
+
+#### Examples from production
+
+The repository history contains specific examples of how I managed changes and problems.
+
+- **September 2023:** I increased event-worker concurrency from 100 to 1,000 and adjusted retry behaviour to process a growing backlog.
+- **September 2023:** I tested changes to the queue architecture and reverted unsuccessful approaches within minutes.
+- **Webflow API migration:** A major API update required a rollback, additional fixes and a new release. The full correction cycle took approximately 72 hours.
+- **ClickHouse migration:** I ran the old and new data paths in parallel for months before changing dashboard reads.
+- **Infrastructure migration:** I prepared and tested the new Kubernetes environment before moving production traffic away from AWS.
+
+Nocodelytics operated for approximately three and a half years without a customer-visible outage that took the product offline.
+
+That result came from testing, monitoring, staged migrations and the ability to recover quickly. It was not the result of assuming that failures would never occur.
+
+#### What this project demonstrates
+
+Nocodelytics is the strongest example of my ability to own a complete technical product.
+
+I built and maintained its application, data pipeline, infrastructure, integrations and operational processes.
+
+I also handled customer problems, product priorities and commercial decisions.
+
+The most important result was not the number of technologies used. It was that a small operation could deliver and maintain a commercial analytics platform while controlling cost and complexity.
+
+---
+
+### 3. Financial Times: recommendations and machine learning
+
+**Role:** Full-stack engineer, contract  
+**Period:** July 2017 – July 2018  
+**Technologies:** Python, Keras, LSTM, K-means, AWS EC2, S3, data pipelines
+
+At the Financial Times, I joined work on myFT, the personalised reading experience.
+
+The objective was to recommend useful articles to paying readers.
+
+This was not a straightforward optimisation problem. More article views did not necessarily mean a better experience for a subscriber.
+
+#### The first approach
+
+I experimented with deep-learning recommendation models using LSTM networks in Keras.
+
+After approximately three months, the models gave only a small improvement over a simple baseline that recommended popular front-page articles.
+
+The gain was too small to justify the additional complexity.
+
+I consider spending that long on the complex approach before establishing stronger baselines a mistake.
+
+#### What worked better
+
+I moved to simpler methods using:
+
+- Keyword matching.
+- K-means clustering.
+- Article metadata.
+- Entity-based expansion of topics readers followed.
+
+For example, a reader following Brexit could receive new articles about relevant political figures and developments, even when the article did not explicitly use the term Brexit.
+
+User testing showed that readers were satisfied with the recommendations.
+
+I also built data pipelines used by the data science team, including training workflows on GPU-enabled AWS EC2 instances and storage of model results in S3.
+
+#### What I learned
+
+A technically advanced solution is not automatically a better product.
+
+A simpler method can be easier to test, explain, maintain and improve.
+
+The 2019 RecSys paper *Are We Really Making Much Progress?* later examined a related problem: many neural recommendation approaches did not consistently outperform simpler baselines under careful evaluation.
+
+This experience changed how I approach technical decisions.
+
+I now establish a simple baseline before investing in complexity.
+
+---
+
+### 4. TRIM-IT: delivering a complete product under a deadline
+
+**Role:** Project lead developer, contract  
+**Period:** September 2018 – March 2019  
+**Team:** Four engineers
+
+TRIM-IT was an early-stage London company building an on-demand barber service using mobile vans.
+
+The founders needed working software that could support the business and help demonstrate its potential to investors.
+
+I recruited and led a team of four engineers.
+
+We delivered the platform over approximately six months.
+
+The system included React Native mobile applications, a GraphQL API, serverless AWS infrastructure and automated deployment.
+
+Infrastructure was defined in CloudFormation so environments could be recreated consistently.
+
+#### The difficult part was deciding what to build
+
+At an early-stage company, engineering time is limited.
+
+Every feature creates costs in development, maintenance, testing and support.
+
+A large part of my work was helping the founders distinguish essential requirements from features that could wait.
+
+The objective was to build a reliable product that could serve the company's immediate commercial goals.
+
+That did not mean lowering code quality. It meant reducing unnecessary work.
+
+This project helped me develop from someone focused primarily on technical delivery into an engineer who could also take responsibility for product decisions and business outcomes.
+
+---
+
+### 5. ContentCal: improving an existing product without rewriting everything
+
+**Role:** Software engineer, contract  
+**Period:** June 2020 – June 2021
+
+ContentCal built tools for scheduling social media posts and analysing engagement.
+
+I worked on a new product that had to integrate with an existing codebase.
+
+Rather than replacing the old system, I added new capabilities and improved the architecture gradually.
+
+My work included:
+
+- Social media platform integrations.
+- GraphQL APIs.
+- Architecture improvements.
+- Automated testing.
+- CI/CD pipelines using GitHub Actions.
+
+This allowed the team to make frequent deployments while continuing to support the existing product.
+
+Colleagues later highlighted the simplicity of the solutions and the improvements to deployment and engineering practices.
+
+ContentCal was acquired by Adobe, with the acquisition announced in December 2021.
+
+[Adobe acquisition announcement](https://blog.adobe.com/en/publish/2021/12/08/adobe-to-acquire-content-cal)
+
+---
+
+## How I approach engineering
+
+### Start with the problem, not the technology
+
+I want to understand what the business needs to achieve before choosing tools or designing architecture.
+
+I will use a new technology when it solves a real problem. I will also keep an existing system when replacing it provides little benefit.
+
+My experience with machine learning, databases and infrastructure has repeatedly reinforced this approach.
+
+### Make complexity earn its place
+
+Every dependency, service and abstraction has a maintenance cost.
+
+I prefer small systems with clear responsibilities and well-defined interfaces.
+
+I am comfortable using distributed systems when the problem requires them. I do not believe that distributing everything automatically makes a system better.
+
+### Design for change
+
+Requirements change. Data volumes increase. External APIs change. Earlier technical decisions become unsuitable.
+
+I try to make these changes possible without replacing entire systems.
+
+Examples include the gradual ContentCal architecture changes, the Nocodelytics database migration and the move from AWS to Hetzner.
+
+### Own production, not just development
+
+My responsibility does not end when code is merged.
+
+I care about whether it runs reliably, how it is deployed, how it fails, how problems are detected and how the team can restore service.
+
+That is why I invest in testing, monitoring, migrations, backups and rollback procedures.
+
+### Understand the cost of engineering
+
+I have worked on products where my own income depended on what the software could deliver.
+
+That changes how I evaluate technical choices.
+
+A solution must be good enough to solve the problem reliably. It must also justify its cost.
+
+Building less can be the right decision when the result meets the business need.
+
+### Work independently, but communicate decisions
+
+I have worked with founders, designers, product managers, engineers and data scientists.
+
+I can take responsibility for architecture and implementation, but I also explain the trade-offs so that non-technical people can make informed decisions.
+
+The best technical choice is not useful if it does not support the people and business that depend on it.
+
+---
 
 ## Career history
 
-| Dates | Company | Role |
-| --- | --- | --- |
-| Sep 2010 – Jul 2014 | Intuitive Travel, Haubourdin Town Hall, Agora Finance (for BNP Paribas) | Developer, work-study apprenticeship alongside master's |
-| Jun 2014 – Sep 2014 | IG | JavaScript Junior Developer |
-| Oct 2014 – May 2015 | Adjust Your Set | JavaScript Developer |
-| Jun 2015 – Feb 2017 | Skim.it (later Deeper Insights) | Fullstack Developer, first hire; led two developers |
-| Feb 2017 – Jun 2017 | Lightful | Full Stack Engineer, contract |
-| Jul 2017 – Jul 2018 | Financial Times | Full Stack Engineer, contract |
-| 2018 – 2019 | Independent: Wanderpay, TRIM-IT | Fixed-price product builds |
-| Jun 2020 – Jun 2021 | ContentCal | JavaScript Developer, contract |
-| Jun 2021 – Dec 2024 | Nocodelytics | Co-founder, engineering; acquired |
-| Jan 2025 – now | Independent | See below |
+| Period | Company | Role and main work |
+|---|---|---|
+| 2025–present | Independent | Consulting, business exploration, technical writing, software projects and speaking |
+| 2021–2024 | Nocodelytics | Co-founder; product engineering, infrastructure, operations and acquisition |
+| 2020–2021 | ContentCal | Software engineer; integrations, GraphQL, architecture and CI/CD |
+| 2018–2019 | TRIM-IT | Project lead; four engineers, mobile applications and serverless platform |
+| 2018 | Wanderpay | Fixed-price product development; lender integrations and application UI |
+| 2017–2018 | Financial Times | Full-stack engineering; article pages, data pipelines and recommendations |
+| 2017 | Lightful | Full-stack engineering; Twitter data ingestion and recommendation analysis |
+| 2015–2017 | Skim.it | First engineering hire; ML infrastructure, Node.js, React and small-team leadership |
+| 2014–2015 | Adjust Your Set | JavaScript development, Node.js and web applications |
+| 2014 | IG | JavaScript development |
+| 2012–2014 | Agora Finance / BNP Paribas | Work-study developer; internal applications, server operations and logging |
+| 2011–2012 | Haubourdin Town Hall | Work-study developer; public applications and internal network systems |
+| 2010–2011 | Intuitive Travel | Work-study developer; mobile applications, PHP and MySQL |
 
-Role notes:
+### Early work in machine learning: Skim.it
 
-- **Skim.it**: first hire of an ML/NLP document-summarization startup (later
-  Deeper Insights, a Forbes top-ten AI consulting firm). Microservices for
-  resource-intensive deep-learning models, Node.js API, React front end, CI
-  for the ML infrastructure. Early AWS Lambda and serverless user from 2015,
-  learning at the AWS Pop-up Loft in London.
-- **Lightful**: integrated the Twitter firehose through AWS Kinesis; built
-  K-means clustering and audience-overlap analysis to recommend content and
-  posting times; effectively the most senior engineer on the team.
-- **Financial Times**: article-page redesign (see key achievements),
-  accessibility work, data pipelines, my FT recommendations (see case
-  study), knowledge-transfer training.
-- **Wanderpay** (2018): two-week fixed-price build of the initial product
-  for a travel-BNPL fintech — lender integrations plus the loan-application
-  UI. The co-founder's recommendation above links this build to their seed
-  round. Andy Davis (10x10) saw this work and recommended me for TRIM-IT.
-- **TRIM-IT** (Sep 2018 – Mar 2019): see key achievements.
-- **ContentCal**: social-platform integrations, introduced GraphQL to the
-  team, CI with GitHub Actions and automated tests, on a legacy codebase
-  integrated gradually rather than rewritten. ContentCal was later acquired
-  by Adobe (announced December 2021) — a company outcome I contributed to as
-  one of the engineers.
-- **2025 – now**: after selling Nocodelytics I travelled and explored new
-  business opportunities, and returned to independent software engineering
-  and consulting alongside technical writing and conference speaking.
+I was the first engineering hire at Skim.it, a startup working on document summarisation and natural-language processing.
 
-## Skills
+I worked with researchers and data scientists to build software around resource-intensive machine-learning models.
 
-- TypeScript, JavaScript, Node.js, Express.js, React and React Native.
-- GraphQL and API integrations.
-- Linux, AWS (S3, CloudFront, API Gateway, Lambda, ECS, Aurora, SES,
-  Kinesis, CloudFormation), Azure, GCP (BigQuery).
-- MySQL, PostgreSQL/TimescaleDB, time-series data and data architecture.
-- Test-driven development, automated testing, CI/CD, GitHub Actions,
-  CircleCI, Agile and pair programming.
-- Engineering team leadership and collaboration with designers and data
-  teams.
+My responsibilities included backend services, React interfaces, deployment and ML infrastructure.
 
-## Writing and speaking
+I also helped lead two developers.
 
-### Speaking
+This was where I began using AWS Lambda and serverless architecture in 2015, while the technology was still new.
 
-- "What happens when AI can do your job?" — opened UX Brighton 2026 at
-  Brighton Dome, 6 November 2026. Handout:
-  https://florianherrengt.github.io/ux-brighton-2026/handout/
-- Audience recording: https://youtu.be/UjUNJVMFrXw — official recording to be
-  published on uxbri.org.
-- Formats: 25 to 30 minute talk, or a 90 minute workshop on evals and review
-  gates for AI assisted teams. Travels in Europe.
-- Speaking page: https://florianherrengt.com/speaking.html
+Skim.it later became associated with Deeper Insights, an AI consulting business.
 
-### Writing
+### Data engineering: Lightful
 
-- Most "Best Practices" are cargo cults (26 August 2026):
-  https://blog.florianherrengt.com/do-less.html
-- AI is removing the middle class of software engineering (11 August 2026) —
-  1,014 points and 937 comments on Hacker News:
-  https://blog.florianherrengt.com/ai-removing-middle-class-software-engineering.html
-- How to automate Instagram engagements with computer vision (and get banned)
-  (6 June 2026):
-  https://blog.florianherrengt.com/how-to-automate-instagram-engagements.html
-- Good engineers make boring choices (16 April 2026):
-  https://blog.florianherrengt.com/boring-software-engineer.html
-- From bigrams to attention: a gentle guide to LLMs (21 July 2025):
-  https://blog.florianherrengt.com/how-llms-work.html
-- The vibe coder's career path is doomed (17 July 2025):
-  https://blog.florianherrengt.com/vibe-coder-career-path.html
-- How to reduce query cost with a wide table layout in TimescaleDB (25
-  November 2022, Tiger Data):
-  https://www.tigerdata.com/blog/how-to-use-wide-table-model-to-reduce-query-cost-in-timescaledb
-- Building a basic self driving RC car (23 February 2017):
-  https://blog.florianherrengt.com/self-driving-rc-car.html
+At Lightful, I integrated large-scale Twitter data using AWS Kinesis.
+
+I worked on analysis of audience overlap, posting behaviour and content recommendations.
+
+This included implementing K-means clustering and applying methods from research papers to practical product problems.
+
+---
+
+## Since selling Nocodelytics
+
+After the acquisition in October 2024 and the final handover in December, I took time to travel, explore new business opportunities and decide what I wanted to build next.
+
+I continued to take occasional paid engineering and consulting engagements.
+
+I have also explored several new software ideas and projects, including:
+
+- **ModelNote** — [modelnote.io](https://modelnote.io)
+- **Zuv** — [zuv.app](https://zuv.app)
+- **RethinkLoop** — [rethinkloop.com](https://rethinkloop.com)
+
+These are part of my exploration of new products and business models. I do not present them as established commercial successes.
+
+Alongside this work, I have spent more time on technical writing, AI research, public speaking and developing a podcast.
+
+My professional interests increasingly include how AI changes software engineering, how engineering teams should make decisions and which parts of development work remain valuable as implementation becomes easier to automate.
+
+I continue to work as an independent engineer and consultant while exploring my next business.
+
+---
+
+## Technical skills
+
+### Software development
+
+- TypeScript and JavaScript.
+- Node.js, Fastify and Express.
+- React and React Native.
+- GraphQL and REST APIs.
+- API design and external integrations.
+- PHP and Python.
+- Experience building and benchmarking services in Go.
+
+### Databases and data engineering
+
+- PostgreSQL and TimescaleDB.
+- ClickHouse.
+- MySQL.
+- Time-series and event analytics.
+- SQL query analysis and optimisation.
+- Database schema design.
+- Data migrations and dual-write strategies.
+- Data enrichment pipelines.
+- Machine-learning data infrastructure.
+
+### Infrastructure and distributed systems
+
+- AWS: Lambda, API Gateway, Kinesis, S3, CloudFront, ECS, Aurora, SES and EC2.
+- Infrastructure as code with CloudFormation.
+- Kubernetes and k3s.
+- Helm and Kubernetes deployment configuration.
+- Hetzner infrastructure.
+- NATS JetStream.
+- Longhorn persistent storage.
+- Docker, Linux and reverse proxies.
+- Azure and Google Cloud services, including BigQuery.
+
+### Engineering practices
+
+- Automated testing and end-to-end testing.
+- Test-driven development.
+- Continuous integration and deployment.
+- GitHub Actions, CircleCI and Drone CI.
+- Monitoring and production diagnostics.
+- Backup and recovery procedures.
+- Incremental architecture migrations.
+- Technical leadership, mentoring and pair programming.
+
+### Machine learning and AI
+
+- Recommendation systems.
+- Clustering and classification.
+- Natural-language processing.
+- Neural networks and LSTM models.
+- Machine-learning training infrastructure.
+- Practical evaluation of models against simple baselines.
+- LLM systems, agent workflows and AI-assisted software engineering.
+
+I have worked directly with machine-learning systems, but my main professional expertise is software and systems engineering rather than academic ML research.
+
+---
+
+## What people I have worked with say
+
+The following excerpts come from recommendations by former clients, colleagues and co-founders.
+
+### Sait Cham — Wanderpay co-founder
+
+> "Florian acts as a perfect bridge between non-technical founders and their product... able to hire, organise and manage our developers... Because of Florian's expertise in management and product architecture, we were able to raise a healthy seed-round and take our initial product to market."
+
+### Julian Hamm — ContentCal
+
+> "What I like about Florian's solutions is that they're simple and clean, which is very rare to find."
+
+Julian also credited improvements to AWS, GraphQL, serverless engineering and CI/CD practices that allowed frequent deployment.
+
+### Taran Gulati — ContentCal
+
+> "A stellar developer with a breadth of technical knowledge and strong business sense. He has been instrumental in re-architecting the tech stack whilst balancing the business needs."
+
+### Sarwech Shar — Nocodelytics co-founder
+
+> "His ability to learn new concepts and then immediately apply his knowledge is uncanny."
+
+Sarwech referred to independent technical experiments, including a neural-network-based RC car and rapid learning of mobile development.
+
+### Miroslav Batchkarov — Skim.it
+
+> "One of those rare people who understand both software engineering and your business needs. He can build the software you want but can also help you figure out what you want."
+
+Miroslav later became a research engineer at Google DeepMind.
+
+### Andy Davis — 10x10
+
+> "It's rare to come across commercially minded engineers and much rarer to come across some with such high talent — that is who Florian is."
+
+These recommendations reflect direct professional relationships. The original recommendations can be checked through my [LinkedIn profile](https://www.linkedin.com/in/florian-herrengt-ab203494/).
+
+---
+
+## Writing, research and public speaking
+
+I write about engineering decisions, software architecture, artificial intelligence and the economics of building software.
+
+My writing focuses on what works in practice, what fails and how engineers can make better decisions.
+
+### Selected writing
+
+**Most "Best Practices" are cargo cults** — 26 August 2026  
+[Read article](https://blog.florianherrengt.com/do-less.html)
+
+An examination of engineering conventions and why following practices without understanding their purpose can create unnecessary complexity.
+
+**AI is removing the middle class of software engineering** — 11 August 2026  
+[Read article](https://blog.florianherrengt.com/ai-removing-middle-class-software-engineering.html)
+
+An analysis of how AI changes the value of software implementation and engineering judgement.
+
+The article reached the Hacker News front page and received 1,014 points and 937 comments.
+
+**Good engineers make boring choices** — 16 April 2026  
+[Read article](https://blog.florianherrengt.com/boring-software-engineer.html)
+
+Why simple, established solutions can be better engineering choices than more complex alternatives.
+
+**From bigrams to attention: a gentle guide to LLMs** — 21 July 2025  
+[Read article](https://blog.florianherrengt.com/how-llms-work.html)
+
+A technical explanation of language models, from simpler statistical methods to modern attention-based architectures.
+
+**The vibe coder's career path is doomed** — 17 July 2025  
+[Read article](https://blog.florianherrengt.com/vibe-coder-career-path.html)
+
+A discussion of AI-assisted coding and the long-term value of software engineering skills.
+
+**How to automate Instagram engagements with computer vision (and get banned)** — 6 June 2026  
+[Read article](https://blog.florianherrengt.com/how-to-automate-instagram-engagements.html)
+
+A practical computer-vision automation experiment, including what went wrong.
+
+**How to reduce query cost with a wide table layout in TimescaleDB** — 25 November 2022  
+[Read article on Tiger Data](https://www.tigerdata.com/blog/how-to-use-wide-table-model-to-reduce-query-cost-in-timescaledb)
+
+A production database optimisation case study from Nocodelytics, published by the database vendor.
+
+### Public speaking
+
+**UX Brighton 2026 — "What happens when AI can do your job?"**
+
+I opened UX Brighton at Brighton Dome on 6 November 2026.
+
+The talk explored how AI changes professional work, why faster execution does not automatically lead to better outcomes and why making good decisions becomes more important as tools improve.
+
+- [Talk handout and sources](https://florianherrengt.github.io/ux-brighton-2026/handout/)
+- [Audience recording](https://youtu.be/UjUNJVMFrXw)
+- [Speaking page](https://florianherrengt.com/speaking.html)
+
+I also develop presentations and workshops about AI-assisted engineering, evaluation methods and decision-making.
+
+My workshop format includes practical approaches to evaluations and review gates for teams using AI.
 
 ### Interviews and appearances
 
-- Timescale Timeout with Florian Herrengt and Chris Engelbert:
-  https://www.youtube.com/watch?v=k4BJdmpuhro
-- Benjamin Michel: Decision Making in Tech:
-  https://www.youtube.com/watch?v=PBZ2NKFaRKo
+- [Timescale Timeout — Florian Herrengt and Chris Engelbert](https://www.youtube.com/watch?v=k4BJdmpuhro)
+- [Benjamin Michel — Decision Making in Tech](https://www.youtube.com/watch?v=PBZ2NKFaRKo)
 
-## Related coverage
+---
 
-- Adobe to acquire ContentCal:
-  https://blog.adobe.com/en/publish/2021/12/08/adobe-to-acquire-content-cal
-- BBC, Mobile barbering: "It's like Uber, but for haircuts" (TRIM-IT):
-  https://www.bbc.com/news/stories-47711610
-- Forbes, What Are The 10 Best AI Consulting Firms (Deeper Insights):
-  https://www.forbes.com/sites/bernardmarr/2022/08/17/what-are-the-10-best-ai-consulting-firms/
+## Background and independent projects
 
-## Background (optional, deep context)
+### Education
 
-- Education: master's in computer science (Ingésup) as a French work-study
-  apprenticeship (alternance) — one full week at a company, one week in
-  class, for five years, 2010–2014. The employer and regional council paid
-  the training costs. This is why my CV shows four years of employment
-  before graduation.
-- Childhood: computers since early childhood; RPG Maker games with scripts
-  as a kid; at 17 spent a year building my high school's website in a small
-  French town, self-taught HTML/CSS, including a map page for the open house
-  days — the demo that got me my first job.
-- Early roles in one line each: Intuitive Travel — iOS/geo-located sound app
-  Terra Sonata, PHP/MySQL, mentored daily by the founder. Haubourdin Town
-  Hall — jQuery/Ajax apps used by residents, network restructure. Agora
-  Finance/BNP Paribas — regulation-heavy corporate work, centralized log
-  management, first single-page application (Sensa, Ext JS); they offered to
-  hire me on graduation.
-- Side project with public impact: during COVID (2020) I organized a
-  3D-printing operation making face shields for NHS workers — raised funding
-  via GoFundMe, production at Craft Central, feedback loop with medical
-  staff, 1,000+ shields by May 2020:
-  https://blog.florianherrengt.com/3d-printing-ppe.html
-- People worth knowing about: Kevin Rion (mentor, Adjust Your Set), Joshua
-  (Skim.it CTO, close friend), Miroslav Batchkarov (Skim.it, now Google
-  DeepMind), Sarwech Shar (Nocodelytics co-founder, now VEED), Sait Cham
-  (Wanderpay), Andy Davis (10x10), Harry and Harris (ContentCal engineers).
+I have a master's degree in computer science from Ingésup in France.
 
-## Provenance
+I completed my education through a five-year work-study programme, known in France as *alternance*.
 
-The narrative parts of this profile were compiled in November 2026 from my
-voice recordings and verified against LinkedIn, my CV and public sources. One
-employer is deliberately excluded at my request. Transcription corrections
-applied: Oborda → Haubourdin; "the Joshua Said" → Adjust Your Set; Schemit →
-Skim.it; Nightfall/Leitford → Lightful; Trimit → TRIM-IT; Wanderer →
-Wanderpay; Nokolitic → Nocodelytics; Sawesh → Sarwech Shar; "sensor
-development" → Sensa (Ext JS application at BNP Paribas); "in Pakistan"
-removed (transcription error). Still unverified: Joshua's last name; Danny;
-Harry and Harris; what "Model Notes" was.
+The programme combined academic study with paid work at software companies. The schedule alternated between time at university and time working for employers.
 
-## Online
+I began professional development work in 2010, before completing my degree.
 
-- Website: https://florianherrengt.com/
-- Blog: https://blog.florianherrengt.com/
-- GitHub: https://github.com/florianherrengt
-- LinkedIn and consulting contact: https://www.linkedin.com/in/florian-herrengt-ab203494/
-- X: https://x.com/florianherrengt
-- Hacker News submissions: https://news.ycombinator.com/submitted?id=florianherrengt
-- Newsletter: https://newsletter.florianherrengt.com/subscription/form
-- RSS: https://blog.florianherrengt.com/rss.xml
-- CV: https://florianherrengt.com/cv.html
-- This profile: https://florianherrengt.com/llms.txt
+This gave me practical experience with real customers, production systems and experienced engineers while I was still studying.
+
+The programme was funded through employers and public education arrangements.
+
+### How I started programming
+
+I began using computers and writing simple programs when I was young.
+
+As a teenager, I built games with RPG Maker and learned web development independently.
+
+At 17, I spent approximately a year building a website for my secondary school in France. It included information pages and a map used during school open days.
+
+I demonstrated that project when applying for my first development position.
+
+That experience established a pattern I have followed throughout my career: learn what is necessary, build something useful and improve it through practical work.
+
+### Organising PPE production during COVID-19
+
+In 2020, when hospitals faced shortages of protective equipment, I helped organise a local 3D-printing operation to produce face shields for NHS workers.
+
+I raised funding, established production at Craft Central and worked with medical staff to improve the designs.
+
+The operation produced more than 1,000 face shields by early May 2020.
+
+This was not a commercial software project. It was an example of taking an unfamiliar problem, organising resources and delivering a practical result.
+
+- [Project write-up](https://blog.florianherrengt.com/3d-printing-ppe.html)
+- [Fundraising page](https://www.gofundme.com/f/3d-printing-face-shields-for-nhs-workers)
+
+### Building a self-driving RC car
+
+In 2017, I built an experimental autonomous RC car using Arduino, Python, a camera, computer vision and machine learning.
+
+The project was a way to learn by applying new concepts to a working physical system.
+
+It was an early example of my interest in machine learning outside my professional work.
+
+[Read the project article](https://blog.florianherrengt.com/self-driving-rc-car.html)
+
+---
+
+## Professional approach and commercial value
+
+My experience combines three areas that are often treated separately.
+
+**Engineering:** I can design systems, write software, investigate failures and operate applications in production.
+
+**Product development:** I can work with founders and product teams to decide what to build, how to test an idea and what work should be avoided.
+
+**Commercial ownership:** I have built software for clients, worked on fixed-price product contracts and operated a business where engineering choices affected my own costs and revenue.
+
+This combination is especially useful in smaller teams, early-stage companies and projects with limited resources.
+
+A client may need someone who can work across application code, infrastructure, databases and product decisions instead of requiring a separate specialist for every part.
+
+That does not mean one engineer can replace a complete team in every situation. It means I can take responsibility for a wide part of the delivery process and identify where additional expertise is necessary.
+
+I am particularly interested in projects where the engineering challenge has a clear business purpose and where I can help make both technical and product decisions.
+
+---
+
+## Public evidence and sources
+
+The profile combines my account of work I performed with public articles, company records, conference material and recommendations from people I worked with.
+
+External sources help confirm parts of my career and the existence of products and projects. Technical details from private production systems are based on my direct work and can be discussed in a technical interview.
+
+### Technical work
+
+- [TimescaleDB engineering case study](https://www.tigerdata.com/blog/how-to-use-wide-table-model-to-reduce-query-cost-in-timescaledb)
+- [Nocodelytics co-founder announcement](https://www.nocodelytics.com/blog/nocodelytics-is-now-a-team-of-two)
+- [Nocodelytics product development announcement](https://www.nocodelytics.com/blog/new-nocodelytics)
+- [Nocodelytics at Webflow Conf 2022](https://youtu.be/aUXgKFEQugQ?t=3487)
+
+### Company and project coverage
+
+- [Adobe announcement of ContentCal acquisition](https://blog.adobe.com/en/publish/2021/12/08/adobe-to-acquire-content-cal)
+- [BBC coverage of TRIM-IT](https://www.bbc.com/news/stories-47711610)
+- [Le Journal des Entreprises — Intuitive Travel](https://www.lejournaldesentreprises.com/article/intuitive-travel-la-boite-outils-intelligents-du-secteur-du-voyage-39197)
+- [Forbes — AI consulting companies, including Deeper Insights](https://www.forbes.com/sites/bernardmarr/2022/08/17/what-are-the-10-best-ai-consulting-firms/)
+
+Coverage of an employer or client is not evidence that I was responsible for every company outcome. My personal responsibilities are described separately.
+
+### Recommendations
+
+My professional recommendations are available on [LinkedIn](https://www.linkedin.com/in/florian-herrengt-ab203494/).
+
+References from former clients, colleagues and co-founders can provide additional evidence about specific projects, responsibilities and working practices.
+
+---
+
+## Online profiles and contact
+
+- **Website:** https://florianherrengt.com/
+- **CV:** https://florianherrengt.com/cv.html
+- **Blog:** https://blog.florianherrengt.com/
+- **GitHub:** https://github.com/florianherrengt
+- **LinkedIn:** https://www.linkedin.com/in/florian-herrengt-ab203494/
+- **Speaking:** https://florianherrengt.com/speaking.html
+- **X:** https://x.com/florianherrengt
+- **Hacker News:** https://news.ycombinator.com/submitted?id=florianherrengt
+- **Newsletter:** https://newsletter.florianherrengt.com/subscription/form
+- **RSS:** https://blog.florianherrengt.com/rss.xml
+
+For software engineering, technical consulting, speaking or collaboration enquiries, contact me through LinkedIn or my website.
+
+---
+
+*Profile last updated: 14 November 2026.*
