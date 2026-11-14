@@ -56,12 +56,16 @@ wide table layout instead of a normalized one:
 
 ### Nocodelytics: end to end, from rebuild to exit (2021 - 2024)
 
-I joined Sarwech Shar as co-founder in June 2021 — Nocodelytics was an MVP
-with paying customers — and rebuilt the entire platform: a TypeScript
-monorepo with Webflow OAuth sign-up, a React/GraphQL dashboard, a
-lightweight tracker script, and an event pipeline designed for volume. Team
-of three at the peak. From mid-2023 I ran the whole company alone through
-to the sale: product, engineering, infrastructure, operations, support.
+I joined as co-founder in June 2021 — Nocodelytics was an MVP with paying
+customers — and rebuilt the entire platform: a TypeScript monorepo with
+Webflow OAuth sign-up, a React/GraphQL dashboard, a lightweight tracker
+script, and an event pipeline designed for volume. I built the product
+alone for the first six months; by the formal June 2021 start I had
+already shipped ~180 commits, and the engineering platform — CI, Docker
+builds, migrations in the pipeline, dependency automation — was stood up
+in a single 88-commit day in April 2021. Team of three at the peak. From
+mid-2023 I ran the whole company alone through to the sale: product,
+engineering, infrastructure, operations, support.
 
 - Product: per-element clicks, forms, searches and CMS analytics —
   categories other analytics tools did not cover for Webflow. Very large
@@ -69,29 +73,126 @@ to the sale: product, engineering, infrastructure, operations, support.
   selling point; CMS event attribution worked without any Webflow hooks,
   by parsing rendered pages to infer the collection and item behind a
   click.
-- Pipeline, measured in production: Fastify ingestion, NATS JetStream as
-  the durable queue, enrichment workers, batched inserts into ClickHouse
-  (events moved from TimescaleDB in 2023). I built and benchmarked a Go
-  rewrite of the ingestion API and a full AWS Kinesis/Glue/Athena
-  serverless pipeline before choosing the self-hosted path on cost and
-  operability.
-- Operations: a single self-managed k3s cluster — Longhorn, Velero,
-  Traefik, kustomize staging/production overlays, self-hosted Gitea,
-  Drone CI and a private container registry. I was the platform team.
-- Quality bar: 1,400+ commits over four years, all written by me, before
-  AI assistants — every commit was hand-written work; 125 test files;
-  end-to-end tests that verify events land in ClickHouse, run against
-  live staging on every deploy; SQL migrations applied automatically in
-  pipelines; a scheduled production data-integrity check ("events
-  inserted in the last 2h") with email alerts; daily encrypted backups;
-  DPA and GDPR self-service. No incident ever took the product down —
-  for an analytics product, downtime means events missed forever.
+- Pipeline, in production. The path an event takes:
+  - Ingestion: a Fastify API receives every event. It validates the
+    payload, stamps IDs and timestamps on the server so clients cannot
+    forge them, and rejects abusive traffic before anything enters the
+    pipeline.
+  - Queue: accepted events are published to NATS JetStream with
+    file-backed storage. An event is retained until it has been fully
+    processed, so restarts, deploys and traffic spikes never block
+    ingestion and no accepted event is lost.
+  - Enrichment: a worker turns each raw event into a usable one. It
+    resolves the site, geolocates the IP, parses the device, filters out
+    bots and headless browsers, and attributes CMS clicks to the right
+    Webflow collection and item by parsing the rendered page.
+  - Storage: ClickHouse, with rows laid out by site and time so
+    dashboard queries read one contiguous range instead of scanning.
+    Events started in TimescaleDB and moved to ClickHouse in 2023.
+    Because ingestion only talks to the queue, that swap touched
+    neither the tracker nor the API.
+  - Guarantees: a write is acknowledged only after ClickHouse confirms
+    it. A failed insert is quarantined for replay rather than dropped or
+    left blocking the queue. Health checks watch the queue backlog and
+    confirm events keep flowing. Daily off-site backups cover the worst
+    case, and every deploy runs an end-to-end test that sends a real
+    event through the public endpoint and asserts it lands in
+    ClickHouse.
+  - Alternatives I built before choosing this: a Go rewrite of the
+    ingestion API, load-tested against the Node version, and a full
+    serverless pipeline on AWS — Lambda, Kinesis Firehose, S3, Glue,
+    Athena. Self-hosting won on cost and operability at our volume.
+- Operations: one self-managed k3s cluster — 23 self-hosted components
+  across the cluster, storage, databases, queueing, observability, CI/CD
+  and internal tooling, every layer operated alone. The whole platform
+  was rebuilt solo in 10 days in December 2023, ending on a commit that
+  read "working system", replacing AWS with a single self-managed server
+  while production kept running.
+- Quality bar: 1,400+ commits over four years, all before AI assistants —
+  every commit was hand-written work; 125 test files; SQL migrations
+  applied automatically in pipelines; DPA and GDPR self-service. Active
+  41 of 46 months; 22% of commits touched test files; 442 reviewed pull
+  requests; loadtesting scripts from August 2021 onward.
 - Traction: 1.6k installs in the first weeks of the Webflow Marketplace
   launch (November 2022), later the 5,000+ installs category; customers
   included Makerpad and Webflow agencies; testimonials from Jetboost's
-  founder and NoCode.Tech; billing via Stripe and native Webflow
-  Marketplace billing. When Webflow opened Designer extensions in 2023,
-  I shipped ours in about two weeks — charts inside the Webflow designer.
+  founder and NoCode.Tech. When Webflow opened Designer extensions in
+  2023, I shipped ours in just over two weeks — charts inside the
+  Webflow designer.
+- Business instrumentation: MRR reporting, admin subscriber and usage
+  views, usage-based free plan limits with automatic upgrade emails,
+  7-day trials, and billing through both Stripe and native Webflow
+  Marketplace subscriptions.
+
+### Reliability as a team of one (Nocodelytics)
+
+For an analytics product the reliability bar is higher than usual: when the
+tracker is down, events are missed forever. Across 3.5 years — the final 16
+months entirely alone — no incident ever took the product down. The
+mechanisms are visible commit by commit.
+
+Prevention by design:
+
+- Every write path went through a durable queue. My standing rule, from my
+  own notes: "if no one is waiting for the results, always use a queue."
+  Events were persisted before processing; events that failed processing
+  were quarantined and replayed, never dropped.
+- Workers ran as separate deployments from the APIs, so a pipeline backlog
+  could never take the dashboard down, and a deploy could never stall
+  ingestion.
+- Health endpoints for every datastore and worker, wired into Kubernetes
+  liveness and readiness probes, on top of a full observability stack I
+  operated myself.
+- Immutable deployments: container images pinned to exact commit SHAs
+  since December 2022; later, rolling deploys one replica at a time so a
+  bad release never hit every pod at once.
+- Four independent backup layers — cluster volume snapshots, recurring
+  storage backups, daily database dumps, and daily event-store backups
+  to object storage. The event-store backup window was moved into the
+  quietest traffic period after I measured it: backups were scheduled
+  around customers, not around convenience.
+
+Detection beyond uptime:
+
+- A scheduled data-integrity check ran against production, asserting that
+  events were still flowing ("events inserted in the last 2h" is
+  non-zero) and still being enriched (geo country present), emailing me
+  only on failure. It genuinely paged: I tuned its window from 1h to 2h
+  to cut false positives, which is the receipt that it ran for real.
+
+Incident response, measured in the git history:
+
+- Rollback was always the first tool, and it was fast: three queue
+  architecture pivots inside 16 minutes one afternoon in September 2023
+  (switch, revert, switch again); a bad memory increase reverted in
+  33 minutes.
+- Webflow API v2 migration, my largest single change (+8,700 lines,
+  84 files): launched Saturday, rolled back Sunday morning, maintenance
+  mode Sunday afternoon, relaunched Tuesday with the redirect fixes — a
+  full detect, rollback, fix, relaunch cycle inside 72 hours.
+- A throughput weekend in September 2023: worker concurrency raised from
+  100 to 1,000 with retry tuning, to drain an event backlog before
+  customers noticed it in their dashboards.
+- Across 3.5 years: 54 commits on 23 weekend days — every one
+  incident- or migration-driven, never chronic overtime.
+
+Zero-downtime migrations:
+
+- ClickHouse: a six-month dual-write, September 2023 to March 2024.
+  New writes went to ClickHouse alongside Postgres from day one; reads
+  moved six months later, once the new path was proven at full traffic;
+  the Postgres insert was deleted last, as a two-line change.
+- NATS rollout: events were first published for named customer sites,
+  then a growing beta list, then everyone — staged, customer by
+  customer.
+- Leaving AWS: the replacement platform was rebuilt while production
+  kept running; the product was redeployed on the new cluster within
+  the month, and production traffic was cut over in March 2024.
+
+The honest summary: reliability came from simplicity, reversibility and
+rehearsal. Small pieces, queues between them, everything deployable in
+minutes and revertible in minutes, staged before global, and a backup
+layer for the day none of it was enough.
 
 ### Recommendation engine for my FT (Financial Times)
 
