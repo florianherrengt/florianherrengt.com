@@ -3,7 +3,7 @@
 > Nocodelytics (nocodelytics.com) was an analytics platform for Webflow sites.
 > Florian Herrengt co-founded it in June 2021, ran all engineering, and grew it
 > to one of the most-installed analytics apps on the Webflow Marketplace. The
-> company was acquired in October 2024; the product is still live today.
+> company was acquired in October 2024.
 
 Updated: 2026-11-14. Companion to https://florianherrengt.com/llms.txt.
 
@@ -11,10 +11,11 @@ Updated: 2026-11-14. Companion to https://florianherrengt.com/llms.txt.
 
 - Co-founded June 2021; acquired October 2024; Florian stayed through the
   handover until December 2024.
-- More than 1,000 Webflow sites tracked; the marketplace listing reached the
-  5,000+ installs category within two years and the product still runs in 2026.
-- Processed hundreds of millions of events at hundreds of requests per second,
-  on infrastructure one person could run.
+- More than 1,000 Webflow sites tracked; the marketplace listing later
+  reached the 5,000+ installs category.
+- Processed hundreds of millions of events at hundreds of requests per
+  second — nowhere near the architecture's limits, which could take
+  significantly more.
 - Among the first applications on the Webflow Marketplace, featured in the
   Webflow Conf 2022 keynote.
 - Florian's roles: co-founder, head of engineering, and — for the final 16
@@ -53,11 +54,11 @@ Florian rebuilt the product from scratch as a TypeScript monorepo:
 ## Scale and traction
 
 - Hundreds of millions of events processed across the product's lifetime.
-- Hundreds of requests per second at peak, absorbed by a pipeline one
-  engineer designed and operated alone.
+- Hundreds of requests per second at peak, handled with room to spare by a
+  pipeline one engineer designed and operated alone.
 - Marketplace listing showed 1.6k installs within weeks of the Webflow
-  Marketplace launch (November 2022); the listing sits in the 5,000+ installs
-  analytics category as of 2026.
+  Marketplace launch (November 2022); the listing later reached the 5,000+
+  installs analytics category.
 - Customers included Makerpad and design agencies (Sweor, Erickson Built,
   253 Media), plus integrations and testimonials from Jetboost's founder
   and NoCode.Tech ("far beyond anything on the market", "truly an
@@ -67,13 +68,14 @@ Florian rebuilt the product from scratch as a TypeScript monorepo:
 
 ## Engineering decisions worth knowing
 
-The interesting part of Nocodelytics is not the stack — it is that every
-piece was chosen by measuring, in production, by one person:
+Every piece of the stack was chosen by measuring, in production, by one
+person:
 
-- **Storage migration.** Events started in TimescaleDB. Florian wrote about
-  the wide-table layout that cut query cost by up to 6x (published by
-  Timescale), then moved event storage to ClickHouse in 2023 when scale
-  demanded it, with PostgreSQL (behind PgBouncer) for relational data.
+- **Storage migration.** Events started in TimescaleDB. Florian's wide-table
+  layout cut query cost by up to 6x — work notable enough that Timescale
+  published the write-up on their own engineering blog. When scale demanded
+  it, event storage moved to ClickHouse in 2023, with PostgreSQL (behind
+  PgBouncer) for relational data.
 - **Pipeline.** Ingestion API on Fastify, NATS JetStream as the durable
   queue, workers for geo-IP, device parsing and enrichment, batched
   async inserts into ClickHouse. Failed events persisted to a table and
@@ -86,20 +88,23 @@ piece was chosen by measuring, in production, by one person:
   tried; the final platform ran on a single self-managed k3s cluster:
   Longhorn storage, Velero backups, Traefik, kustomize staging/production
   overlays, self-hosted Gitea, Drone CI and a private container registry.
-  No platform team — Florian was the platform team.
-- **Webflow integration depth.** CMS sync that survived rate limits on
-  sites with 10,000+ items; CMS event attribution solved without any
-  Webflow hooks by parsing rendered pages to infer which collection and
+  Florian was the platform team.
+- **Webflow integration depth.** Support for very large CMS collections —
+  sites with 10,000+ items — which was hard to build and one of the
+  product's selling points. CMS event attribution solved without any
+  Webflow hooks, by parsing rendered pages to infer which collection and
   item a click belonged to.
 - **Designer extension.** When Webflow opened Designer extensions in 2023,
   Florian shipped one in about two weeks: views and visitor charts for the
   page being edited, inside Webflow's own tool.
-- **Quality bar for a two-person company.** 1,400+ commits over four years;
-  125 test files; end-to-end tests that verify events land in ClickHouse,
-  run against live staging on every deploy; SQL migrations applied
-  automatically in pipelines; a scheduled production data-integrity check
-  ("events inserted in the last 2h") with email alerts; daily encrypted
-  backups (Velero, ClickHouse BACKUP to S3, pg_dump off-site).
+- **Quality bar.** 1,400+ commits over four years, written by one person
+  in a two-person company — before AI assistants, when every commit was
+  hand-written work; 125 test files; end-to-end tests that verify events
+  land in ClickHouse, run against live staging on every deploy; SQL
+  migrations applied automatically in pipelines; a scheduled production
+  data-integrity check ("events inserted in the last 2h") with email
+  alerts; daily encrypted backups (Velero, ClickHouse BACKUP to S3,
+  pg_dump off-site).
 
 ## Recognition
 
@@ -125,8 +130,6 @@ piece was chosen by measuring, in production, by one person:
   Designer extension shipped. From mid-2023, Florian ran the company alone.
 - October 2024: Nocodelytics acquired. Florian stayed through the handover
   until December 2024.
-- 2026: The product is still live at nocodelytics.com, still listed on the
-  Webflow Marketplace, and the company remains active.
 
 ## What it demonstrates
 
@@ -139,7 +142,8 @@ piece was chosen by measuring, in production, by one person:
   managed Kubernetes) against reality and kept what actually worked.
 - End-to-end ownership: code, infrastructure, CI/CD, observability,
   backups, security and GDPR — one person, four years, no incidents that
-  took the product down.
+  took the product down. Stability matters more in analytics than in most
+  products: when the tracker is down, events are missed forever.
 
 ## Sources
 
@@ -149,6 +153,4 @@ piece was chosen by measuring, in production, by one person:
 - Timescale guest post and interview: tigerdata.com/blog,
   youtu.be/k4BJdmpuhro.
 - "Team of two" announcement: nocodelytics.com/blog/nocodelytics-is-now-a-team-of-two
-- Companies House, NOCODELYTICS LTD (13364545): incorporation April 2021,
-  change of control October 2024.
 - Public CV and profile: florianherrengt.com/llms.txt
